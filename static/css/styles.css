@@ -39,6 +39,11 @@ li {
   font-family: 'Montserrat', sans-serif;
 }
 
+.checkout_container {
+    position: absolute;
+    right: 0;
+}
+
 .left {
   z-index: 1001;
   position: fixed;
@@ -61,6 +66,10 @@ li {
   color: #ffffff;
 }
 
+.img_display {
+  position: absolute;
+  right:300px;
+}
 
 .middle-container {
     position: relative;

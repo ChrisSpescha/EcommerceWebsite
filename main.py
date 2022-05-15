@@ -186,9 +186,10 @@ def show_product(product_id, product_owner):
     return render_template("post.html", product=requested_product, form=form, current_user=current_user)
 
 
-@app.route("/about")
-def about():
-    return render_template("about.html", current_user=current_user)
+@app.route("/about/<profile_id>")
+def user_profile(profile_id):
+    profile = User.query.filter_by(id=profile_id).first()
+    return render_template("about.html", current_user=current_user, profile=profile)
 
 
 @app.route("/contact")

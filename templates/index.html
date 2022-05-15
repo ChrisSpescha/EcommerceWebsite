@@ -1,14 +1,14 @@
 {% include "header.html" %}
 
   <!-- Page Header -->
-  <header class="masthead" style="background-image: url('https://images.unsplash.com/photo-1470092306007-055b6797ca72?ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80')">
+  <header class="masthead" style="background-image: url('https://craftindustryalliance.org/CIAJune/ecommercelede.png')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="site-heading">
-            <h1>Angela's Blog</h1>
-            <span class="subheading">A collection of random musings.</span>
+            <h1>Bazaar Marketplace</h1>
+            <span class="subheading">miscellaneous goods and wares</span>
           </div>
         </div>
       </div>
@@ -30,8 +30,13 @@
             </h3>
           </a>
           <p class="post-meta">Posted by
-            {{product.product_owner.name}}
-            on {{product.date_posted}}
+            <div class="commenterImage">
+                <img src="{{ product.product_owner.email | gravatar }}"/>
+            </div>
+            <a href="{{ url_for('user_profile', profile_id=product.product_owner.id) }}">{{product.product_owner.name}}
+            </a>
+            on {{product.date_posted}}>
+
             {% if current_user.id == 1: %}
             <a href="{{url_for('delete_post', product_id=product.id) }}">✘</a>
             {% endif %}
