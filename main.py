@@ -186,15 +186,10 @@ def show_product(product_id, product_owner):
     return render_template("post.html", product=requested_product, form=form, current_user=current_user)
 
 
-@app.route("/about/<profile_id>")
-def user_profile(profile_id):
+@app.route("/profile/<profile_id>/<username>")
+def user_profile(profile_id, username):
     profile = User.query.filter_by(id=profile_id).first()
-    return render_template("about.html", current_user=current_user, profile=profile)
-
-
-@app.route("/contact")
-def contact():
-    return render_template("contact.html", current_user=current_user)
+    return render_template("profile.html", current_user=current_user, profile=profile)
 
 
 @app.route("/new-post", methods=["GET", "POST"])
@@ -254,10 +249,6 @@ def create_checkout_session(product_id):
     product = Product.query.filter_by(id=product_id).first()
     product_owner = User.query.filter_by(id=product.owner_id).first()
     formatted_price = int(float(product.price) * 100)
-    print(product_owner.stripe_account_id)
-    print(product_owner.name)
-    print(product_owner.email)
-
     stripe_product = stripe.Product.create(name="Rubber Duck")
     # Create Price
     price_obj = stripe.Price.create(
