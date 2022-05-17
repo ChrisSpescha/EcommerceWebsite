@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, flash, abort
+from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
@@ -6,8 +7,7 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import LoginForm, RegisterForm, CreateListingForm, CommentForm
+from forms import LoginForm, RegisterForm, CreateListingForm, ReviewForm
 from flask_gravatar import Gravatar
 import stripe
 import os
@@ -97,7 +97,7 @@ def register():
             # User already exists
             flash("You've already signed up with that email, log in instead!")
             return redirect(url_for('login'))
-
+        # Hashing and Salting Password
         hash_and_salted_password = generate_password_hash(
             form.password.data,
             method='pbkdf2:sha256',
@@ -109,7 +109,7 @@ def register():
             password=hash_and_salted_password,
         )
 
-        # Strip OnBoard
+        # Strip OnBoarding
         response = stripe.Account.create(
                   country="US",
                   type="express",
@@ -129,7 +129,6 @@ def register():
           type="account_onboarding",
         )
         new_user.stripe_account_id = response['id']
-        print(response['id'])
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
@@ -165,31 +164,32 @@ def logout():
     return redirect(url_for('get_all_products'))
 
 
+@app.route("/profile/<profile_id>/<username>")
+@login_required
+def user_profile(profile_id, username):
+    profile = User.query.filter_by(id=profile_id).first()
+    return render_template("profile.html", current_user=current_user, profile=profile)
+
+
 @app.route("/post/<product_owner>/<int:product_id>", methods=["GET", "POST"])
 def show_product(product_id, product_owner):
-    form = CommentForm()
+    form = ReviewForm()
     requested_product = Product.query.get(product_id)
 
     if form.validate_on_submit():
         if not current_user.is_authenticated:
-            flash("You need to login or register to comment.")
+            flash("You need to login or register to review.")
             return redirect(url_for("login"))
 
         new_review = Review(
-            text=form.comment_text.data,
+            text=form.review_text.data,
             review_author=current_user,
             parent_product=requested_product
         )
         db.session.add(new_review)
         db.session.commit()
 
-    return render_template("post.html", product=requested_product, form=form, current_user=current_user)
-
-
-@app.route("/profile/<profile_id>/<username>")
-def user_profile(profile_id, username):
-    profile = User.query.filter_by(id=profile_id).first()
-    return render_template("profile.html", current_user=current_user, profile=profile)
+    return render_template("listing.html", product=requested_product, form=form, current_user=current_user)
 
 
 @app.route("/new-post", methods=["GET", "POST"])
@@ -209,7 +209,7 @@ def add_new_listing():
         db.session.commit()
         return redirect(url_for("get_all_products"))
 
-    return render_template("make-post.html", form=form, current_user=current_user)
+    return render_template("add-listing.html", form=form, current_user=current_user)
 
 
 @app.route("/edit-post/<int:product_id>", methods=["GET", "POST"])
@@ -232,14 +232,21 @@ def edit_listing(product_id):
         db.session.commit()
         return redirect(url_for("show_product", product_id=product.id))
 
-    return render_template("make-post.html", form=edit_form, is_edit=True, current_user=current_user)
+    return render_template("add-listing.html", form=edit_form, is_edit=True, current_user=current_user)
 
 
 @app.route("/delete/<int:product_id>")
-@admin_only
-def delete_post(product_id):
+def delete_listing(product_id):
     post_to_delete = Product.query.get(product_id)
     db.session.delete(post_to_delete)
+    db.session.commit()
+    return redirect(url_for('get_all_products'))
+
+
+@app.route("/delete_review/<int:review_id>")
+def delete_review(review_id):
+    review_to_delete = Review.query.get(review_id)
+    db.session.delete(review_to_delete)
     db.session.commit()
     return redirect(url_for('get_all_products'))
 

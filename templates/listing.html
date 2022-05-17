@@ -6,7 +6,7 @@
 
         <!-- Product section-->
         <section class="py-5">
-            <div class="container px-4 px-lg-5 my-5">
+            <div class="container px-4 px-lg-5 my-5" style="padding-top: 25px;">
                 <div class="row gx-4 gx-lg-5 align-items-center">
                     <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="{{ product.img_url }}" alt="..." /></div>
                     <div class="col-md-6">
@@ -27,15 +27,42 @@
                     </div>
                 </div>
             </div>
+                <div class="col-lg-8 col-md-10 mx-auto comment">
+                    <h1>Customer Reviews</h1>
+                    {% for review in product.reviews: %}
+                    <ul class="commentList">
+                        <li>
+                            <div class="commentText">
+                                {{review.text|safe}}
+                                <div class="commenterImage">
+                                    <img src="{{ review.review_author.email | gravatar }}"/>
+                                </div>
+                                <span class="date sub-text">{{review.review_author.name}}</span>
+                                {% if current_user.id == review.review_author.id %}
+                                    <a href="{{url_for('delete_review', review_id=review.id) }}">✘</a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    </ul>
+                    {% endfor %}
+                </div>
         </section>
+        <div style="width: 30%">
+            {{ ckeditor.load() }}
+            {{ ckeditor.config(name='review_text') }}
+            {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+        </div>
+
+
 
         {% if current_user.id == product.owner_id %}
-    <div class="clearfix">
-        <a class="btn btn-primary float-right" href="{{url_for('edit_listing', product_id=product.id)}}">Edit
-            Listing</a>
-    </div>
-    {% endif %}
+            <div class="clearfix">
+                <a class="btn btn-primary float-right" href="{{url_for('edit_listing', product_id=product.id)}}">Edit Listing</a>
+            </div>
+        {% endif %}
 
 <hr>
+
+
 {% include "footer.html" %}
 {% endblock %}

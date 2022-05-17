@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditorField
 
 
-##WTForm
+# WTForm
 class CreateListingForm(FlaskForm):
     title = StringField("Listing Title", validators=[DataRequired()])
     price = StringField("Price", validators=[DataRequired()])
@@ -27,6 +27,6 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Let Me In!")
 
 
-class CommentForm(FlaskForm):
-    comment_text = CKEditorField("Comment", validators=[DataRequired()])
-    submit = SubmitField("Submit Comment")
+class ReviewForm(FlaskForm):
+    review_text = CKEditorField("Leave a Review!", validators=[DataRequired()])
+    submit = SubmitField("Submit Review")
