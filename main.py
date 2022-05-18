@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, abort
+from flask import Flask, render_template, redirect, url_for, flash, abort, request
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
@@ -10,6 +10,7 @@ from sqlalchemy.orm import relationship
 from forms import LoginForm, RegisterForm, CreateListingForm, ReviewForm
 from flask_gravatar import Gravatar
 import stripe
+import smtplib
 import os
 
 
@@ -81,9 +82,16 @@ def admin_only(f):
     return decorated_function
 
 
-@app.route('/')
+@app.route('/', methods=["GET", "POST"])
 def get_all_products():
     products = Product.query.all()
+    if request.method == "POST":
+        searched_products = []
+        box_value = request.form.get('value')
+        for product in products:
+            if box_value.lower() in product.title.lower():
+                searched_products.append(product)
+        products = searched_products
     return render_template("index.html", all_products=products, current_user=current_user)
 
 
@@ -270,7 +278,7 @@ def create_checkout_session(product_id):
             'quantity': 1,
         }],
         mode='payment',
-        success_url='https://example.com/success',
+        success_url='http://127.0.0.1:5000/success',
         cancel_url='https://example.com/failure',
         payment_intent_data={
             'application_fee_amount': 123,
@@ -279,9 +287,24 @@ def create_checkout_session(product_id):
             },
         },
     )
-    print(session)
 
+    my_email = "ChrisPython100@gmail.com"
+    password = "934texas"
+    with smtplib.SMTP("smtp.gmail.com") as connection:
+        connection.starttls()
+        connection.login(user=my_email, password=password)
+        connection.sendmail(
+            from_addr=my_email,
+            to_addrs=current_user.email,
+            msg="Subject:Thanks for Purchasing!\n\nThis is your Virtual Receipt"
+        )
+    print(current_user.email)
     return redirect(session.url)
+
+
+@app.route('/success', methods=['GET', 'POST'])
+def success():
+    return render_template('success.html')
 
 
 if __name__ == "__main__":

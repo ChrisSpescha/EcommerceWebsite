@@ -9,24 +9,29 @@
             <div class="container px-4 px-lg-5 my-5" style="padding-top: 25px;">
                 <div class="row gx-4 gx-lg-5 align-items-center">
                     <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="{{ product.img_url }}" alt="..." /></div>
-                    <div class="col-md-6">
-                        <div class="small mb-1">SKU: BST-498</div>
-                        <h1 class="display-5 fw-bolder">{{ product.title }}</h1>
-                        <div class="fs-5 mb-5">
-                            <span>${{ product.price }}</span>
+                        <div class="col-md-6">
+                            <a href="{{ url_for('user_profile', profile_id=product.product_owner.id, username=product.product_owner.name) }}"> <div class="small mb-1">Seller: {{ product.product_owner.name }} </div></a>
+                                <h1 class="display-5 fw-bolder">{{ product.title }}</h1>
+                                    <div class="fs-5 mb-5">
+                                        <span>${{ product.price }}</span>
+                                    </div>
+                                <p class="lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium at dolorem quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis delectus ipsam minima ea iste laborum vero?</p>
+                                    {% if current_user.is_authenticated %}
+                                        <div class="d-flex">
+    <!--                                    <input class="form-control text-center me-3" id="inputQuantity" type="num" value="1" style="max-width: 3rem" />-->
+                                            <button class="btn btn-outline-dark flex-shrink-0" type="button">
+    <!--                                    <i class="bi-cart-fill me-1"></i>-->
+                                                <a href="{{url_for('create_checkout_session', product_id=product.id)}}">Buy Now</a>
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div>
+                                            <h5 class="text-muted">login or register to make a purchase</h5>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
-                        <p class="lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium at dolorem quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis delectus ipsam minima ea iste laborum vero?</p>
-                        <div class="d-flex">
-                            <input class="form-control text-center me-3" id="inputQuantity" type="num" value="1" style="max-width: 3rem" />
-                            <button class="btn btn-outline-dark flex-shrink-0" type="button">
-                                <i class="bi-cart-fill me-1"></i>
-                                <a href="{{url_for('create_checkout_session', product_id=product.id)}}">Buy Now</a>
-                            </button>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
                 <div class="col-lg-8 col-md-10 mx-auto comment">
                     <h1>Customer Reviews</h1>
                     {% for review in product.reviews: %}
@@ -47,7 +52,8 @@
                     {% endfor %}
                 </div>
         </section>
-        <div style="width: 30%">
+            <hr>
+        <div style="width: 30%;">
             {{ ckeditor.load() }}
             {{ ckeditor.config(name='review_text') }}
             {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
