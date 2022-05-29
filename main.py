@@ -7,7 +7,7 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from forms import LoginForm, RegisterForm, CreateListingForm, ReviewForm
+from forms import LoginForm, RegisterForm, CreateListingForm, ReviewForm, MessageForm
 from flask_gravatar import Gravatar
 import stripe
 import smtplib
@@ -43,21 +43,22 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(100), nullable=False)
     stripe_account_id = db.Column(db.String(100), nullable=False)
     reviews = relationship("Review", back_populates="review_author")
-    products = relationship("Product", back_populates='product_owner')
+    products = relationship("Product", back_populates="product_owner")
+    messages = relationship("Message", back_populates="author")
 
 
 class Product(db.Model):
     __tablename__ = "products"
     id = db.Column(db.Integer, primary_key=True)
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    reviews = relationship("Review", back_populates="parent_product")
+    product_owner = relationship("User", back_populates='products')
     title = db.Column(db.String(250), unique=True, nullable=False)
     price = db.Column(db.String(250), nullable=False)
     description = db.Column(db.String(250), nullable=False)
     stock = db.Column(db.Integer, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
     date_posted = db.Column(db.String(250), nullable=False)
-    reviews = relationship("Review", back_populates="parent_product")
-    product_owner = relationship("User", back_populates='products')
 
 
 class Review(db.Model):
@@ -70,7 +71,25 @@ class Review(db.Model):
     text = db.Column(db.Text, nullable=False)
 
 
-# db.create_all()
+class Chat(db.Model):
+    __tablename__ = "chats"
+    id = db.Column(db.Integer, primary_key=True)
+    messages = relationship("Message", back_populates="parent_chat")
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+    id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.Integer, db.ForeignKey("chats.id"))
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    parent_chat = relationship("Chat", back_populates="messages")
+    author = relationship("User", back_populates="messages")
+    text = db.Column(db.Text, nullable=False)
+    date_sent = db.Column(db.String(250), nullable=False)
+    # time_sent = db.Column(db.String(250), nullable=False)
+
+
+db.create_all()
 
 
 def admin_only(f):
@@ -177,6 +196,25 @@ def logout():
 def user_profile(profile_id, username):
     profile = User.query.filter_by(id=profile_id).first()
     return render_template("profile.html", current_user=current_user, profile=profile)
+
+
+@app.route("/message_center", methods=["GET", "POST"])
+@login_required
+def message_center():
+    form = MessageForm()
+    if form.validate_on_submit():
+        new_chat = Chat(
+        )
+        message = Message(
+            text=form.message.data,
+            author=current_user,
+            parent_chat=new_chat,
+            date_sent=date.today().strftime("%B %d, %Y")
+        )
+        db.session.add(new_chat)
+        db.session.add(message)
+        db.session.commit()
+    return render_template("message_center.html", form=form)
 
 
 @app.route("/post/<product_owner>/<int:product_id>", methods=["GET", "POST"])

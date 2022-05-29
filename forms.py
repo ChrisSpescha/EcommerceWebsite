@@ -30,3 +30,8 @@ class LoginForm(FlaskForm):
 class ReviewForm(FlaskForm):
     review_text = CKEditorField("Leave a Review!", validators=[DataRequired()])
     submit = SubmitField("Submit Review")
+
+
+class MessageForm(FlaskForm):
+    message = StringField("Messages", validators=[DataRequired()])
+    submit = SubmitField("Send")

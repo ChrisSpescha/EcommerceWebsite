@@ -1,13 +1,14 @@
-// Styling for the footer
-footer {
-  padding: 50px 0 65px;
-  .list-inline {
-    margin: 0;
-    padding: 0;
-  }
+footer.sticky-footer {
+  padding: 2rem 0;
+  flex-shrink: 0;
   .copyright {
-    font-size: 14px;
-    margin-bottom: 0;
-    text-align: center;
+    line-height: 1;
+    font-size: 0.8rem;
+  }
+}
+
+body.sidebar-toggled {
+  footer.sticky-footer {
+    width: 100%;
   }
 }

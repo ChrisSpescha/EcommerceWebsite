@@ -1,3 +1,6 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block content %}
 {% include "header.html" %}
 
 <div class="row py-5 px-4"> <div class="col-md-5 mx-auto">
@@ -16,6 +19,7 @@
 
     <div class="py-4 px-4">
       <div class="d-flex align-items-center justify-content-between mb-3">
+        <a href="{{ url_for('message_center') }}">Send Message</a>
         <h5 class="mb-0">Products Listed</h5>
       </div>
       <div class="row">
@@ -33,4 +37,6 @@
 </div>
   </div>
 
-  {% include "footer.html" %}
+
+{% include "footer.html" %}
+{% endblock %}

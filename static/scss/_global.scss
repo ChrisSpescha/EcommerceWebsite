@@ -1,77 +1,60 @@
-// Global styling for this template
+// Global component styles
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
 body {
-  font-size: 20px;
-  color: $gray-900;
-  @include serif-font;
-}
-
-p {
-  line-height: 1.5;
-  margin: 30px 0;
-  a {
-    text-decoration: underline;
-  }
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 800;
-  @include sans-serif-font;
+  height: 100%;
 }
 
 a {
-  color: $gray-900;
-  @include transition-all;
-  &:focus,
-  &:hover {
-    color: $primary;
+  &:focus {
+    outline: none;
   }
 }
 
-blockquote {
-  font-style: italic;
-  color: $gray-600;
+// Main page wrapper
+#wrapper {
+  display: flex;
+  #content-wrapper {
+    background-color: $gray-100;
+    width: 100%;
+    overflow-x: hidden;
+    #content {
+      flex: 1 0 auto;
+    }
+  }
 }
 
-.section-heading {
-  font-size: 36px;
-  font-weight: 700;
-  margin-top: 60px;
+// Set container padding to match gutter width instead of default 15px
+.container,
+.container-fluid {
+  padding-left: $grid-gutter-width;
+  padding-right: $grid-gutter-width;
 }
 
-.caption {
-  font-size: 14px;
-  font-style: italic;
-  display: block;
-  margin: 0;
-  padding: 10px;
+// Scroll to top button
+.scroll-to-top {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  display: none;
+  width: 2.75rem;
+  height: 2.75rem;
   text-align: center;
-  border-bottom-right-radius: 5px;
-  border-bottom-left-radius: 5px;
-}
-
-::-moz-selection {
   color: $white;
-  background: $primary;
-  text-shadow: none;
-}
-
-::selection {
-  color: $white;
-  background: $primary;
-  text-shadow: none;
-}
-
-img::selection {
-  color: $white;
-  background: transparent;
-}
-
-img::-moz-selection {
-  color: $white;
-  background: transparent;
+  background: fade-out($gray-800, .5);
+  line-height: 46px;
+  &:focus,
+  &:hover {
+    color: white;
+  }
+  &:hover {
+    background: $gray-800;
+  }
+  i {
+    font-weight: 800;
+  }
 }
