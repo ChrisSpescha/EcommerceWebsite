@@ -17,24 +17,24 @@
       </div>
     </div>
 
-    <div class="py-4 px-4">
-      <div class="d-flex align-items-center justify-content-between mb-3">
-        <a href="{{ url_for('message_center') }}">Send Message</a>
-        <h5 class="mb-0">Products Listed</h5>
-      </div>
-      <div class="row">
-        {% for product in current_user.products %}
-        <div class="col-lg-6 mb-2 pr-lg-1">
-          <a href="{{ url_for('show_product', product_owner=product.product_owner.name, product_id=product.id) }}">
-          <img src="{{ product.img_url }}" alt="" class="img-fluid rounded shadow-sm">
-          </a>
+          <div class="py-4 px-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <a href="{{ url_for('compose_message') }}">Send Message</a>
+              <h5 class="mb-0">Products Listed</h5>
+            </div>
+            <div class="row">
+              {% for product in current_user.products %}
+              <div class="col-lg-6 mb-2 pr-lg-1">
+                <a href="{{ url_for('show_product', product_owner=product.product_owner.name, product_id=product.id) }}">
+                <img src="{{ product.img_url }}" alt="" class="img-fluid rounded shadow-sm">
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
         </div>
-        {% endfor %}
       </div>
     </div>
-  </div>
-</div>
-</div>
   </div>
 
 

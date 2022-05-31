@@ -47,6 +47,25 @@ class User(UserMixin, db.Model):
     messages = relationship("Message", back_populates="author")
 
 
+class Chat(db.Model):
+    __tablename__ = "chats"
+    id = db.Column(db.Integer, primary_key=True)
+    messages = relationship("Message", back_populates="parent_chat")
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+    id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.Integer, db.ForeignKey("chats.id"))
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    parent_chat = relationship("Chat", back_populates="messages")
+    author = relationship("User", back_populates="messages")
+    text = db.Column(db.Text, nullable=False)
+    receiver = db.Column(db.Integer, nullable=False)
+    date_sent = db.Column(db.String(250), nullable=False)
+    # time_sent = db.Column(db.String(250), nullable=False)
+
+
 class Product(db.Model):
     __tablename__ = "products"
     id = db.Column(db.Integer, primary_key=True)
@@ -69,24 +88,6 @@ class Review(db.Model):
     parent_product = relationship("Product", back_populates="reviews")
     review_author = relationship("User", back_populates="reviews")
     text = db.Column(db.Text, nullable=False)
-
-
-class Chat(db.Model):
-    __tablename__ = "chats"
-    id = db.Column(db.Integer, primary_key=True)
-    messages = relationship("Message", back_populates="parent_chat")
-
-
-class Message(db.Model):
-    __tablename__ = "messages"
-    id = db.Column(db.Integer, primary_key=True)
-    chat_id = db.Column(db.Integer, db.ForeignKey("chats.id"))
-    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    parent_chat = relationship("Chat", back_populates="messages")
-    author = relationship("User", back_populates="messages")
-    text = db.Column(db.Text, nullable=False)
-    date_sent = db.Column(db.String(250), nullable=False)
-    # time_sent = db.Column(db.String(250), nullable=False)
 
 
 db.create_all()
@@ -198,7 +199,27 @@ def user_profile(profile_id, username):
     return render_template("profile.html", current_user=current_user, profile=profile)
 
 
-@app.route("/message_center", methods=["GET", "POST"])
+@app.route("/message_center/<profile_id>", methods=["GET", "POST"])
+@login_required
+def message_center(profile_id):
+    form = MessageForm()
+    if form.validate_on_submit():
+        new_chat = Chat(
+        )
+        message = Message(
+            text=form.message.data,
+            author=current_user,
+            receiver=profile_id,
+            parent_chat=new_chat,
+            date_sent=date.today().strftime("%B %d, %Y")
+        )
+        db.session.add(new_chat)
+        db.session.add(message)
+        db.session.commit()
+    return render_template("message_center.html", form=form)
+
+
+@app.route("/compose_message", methods=["GET", "POST"])
 @login_required
 def message_center():
     form = MessageForm()
