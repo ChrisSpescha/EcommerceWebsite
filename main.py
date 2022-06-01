@@ -44,26 +44,14 @@ class User(UserMixin, db.Model):
     stripe_account_id = db.Column(db.String(100), nullable=False)
     reviews = relationship("Review", back_populates="review_author")
     products = relationship("Product", back_populates="product_owner")
-    messages = relationship("Message", back_populates="author")
 
 
 class Chat(db.Model):
     __tablename__ = "chats"
     id = db.Column(db.Integer, primary_key=True)
-    messages = relationship("Message", back_populates="parent_chat")
-
-
-class Message(db.Model):
-    __tablename__ = "messages"
-    id = db.Column(db.Integer, primary_key=True)
-    chat_id = db.Column(db.Integer, db.ForeignKey("chats.id"))
-    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    parent_chat = relationship("Chat", back_populates="messages")
-    author = relationship("User", back_populates="messages")
-    text = db.Column(db.Text, nullable=False)
-    receiver = db.Column(db.Integer, nullable=False)
-    date_sent = db.Column(db.String(250), nullable=False)
-    # time_sent = db.Column(db.String(250), nullable=False)
+    sender = db.Column(db.Integer)
+    receiver = db.Column(db.Integer)
+    messages = db.Column(db.String(100))
 
 
 class Product(db.Model):
@@ -199,41 +187,29 @@ def user_profile(profile_id, username):
     return render_template("profile.html", current_user=current_user, profile=profile)
 
 
-@app.route("/message_center/<profile_id>", methods=["GET", "POST"])
+@app.route("/compose_message/<receiver_id>", methods=["GET", "POST"])
 @login_required
-def message_center(profile_id):
+def compose_message(receiver_id):
     form = MessageForm()
     if form.validate_on_submit():
         new_chat = Chat(
-        )
-        message = Message(
-            text=form.message.data,
-            author=current_user,
-            receiver=profile_id,
-            parent_chat=new_chat,
-            date_sent=date.today().strftime("%B %d, %Y")
+            sender=current_user.id,
+            receiver=receiver_id,
+            messages=form.message.data
         )
         db.session.add(new_chat)
-        db.session.add(message)
         db.session.commit()
     return render_template("message_center.html", form=form)
 
 
-@app.route("/compose_message", methods=["GET", "POST"])
+@app.route("/message_center", methods=["GET", "POST"])
 @login_required
 def message_center():
     form = MessageForm()
     if form.validate_on_submit():
         new_chat = Chat(
         )
-        message = Message(
-            text=form.message.data,
-            author=current_user,
-            parent_chat=new_chat,
-            date_sent=date.today().strftime("%B %d, %Y")
-        )
         db.session.add(new_chat)
-        db.session.add(message)
         db.session.commit()
     return render_template("message_center.html", form=form)
 
@@ -365,6 +341,7 @@ def create_checkout_session(product_id):
 def success():
     return render_template('success.html')
 
-
 if __name__ == "__main__":
     app.run(debug=True)
+
+
