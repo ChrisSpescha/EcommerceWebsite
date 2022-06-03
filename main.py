@@ -199,6 +199,7 @@ def user_profile(profile_id, username):
     return render_template("profile.html", current_user=current_user, profile=profile)
 
 
+# Messaging Routes
 @app.route("/compose_message/<receiver_id>", methods=["GET", "POST"])
 @login_required
 def compose_message(receiver_id):
@@ -223,24 +224,30 @@ def compose_message(receiver_id):
     return render_template("compose_message.html", form=form)
 
 
-@app.route("/message_center", methods=["GET", "POST"])
+@app.route("/message_center/<chat_id>", methods=["GET", "POST"])
 @login_required
-def message_center():
+def message_center(chat_id):
+    current_chat = Chat.query.filter_by(id=chat_id).first()
     chats = Chat.query.all()
     user_chats = []
     for chat in chats:
         if current_user.id == chat.User1_ID or current_user.id == chat.User2_ID:
             user_chats.append(chat)
-    return render_template("message_center.html", chats=user_chats)
+    if request.method == "POST":
+        body = request.form.get('text')
+        # Commit new Msg to Existing Chat
+        new_msg = Message(
+            parent_chat=current_chat,
+            message_author=current_user.name,
+            body=body,
+            date_posted=date.today().strftime("%B %d, %Y")
+        )
+        db.session.add(new_msg)
+        db.session.commit()
+    return render_template("message_center.html", chats=user_chats, current_chat=current_chat)
 
 
-@app.route("/chat/<chat_id>", methods=["GET", "POST"])
-@login_required
-def display_chat(chat_id):
-    chat = Chat.query.filter_by(id=chat_id)
-    return render_template("chat.html", chat=chat)
-
-
+# Product Routes
 @app.route("/post/<product_owner>/<int:product_id>", methods=["GET", "POST"])
 def show_product(product_id, product_owner):
     form = ReviewForm()
@@ -321,6 +328,7 @@ def delete_review(review_id):
     return redirect(url_for('get_all_products'))
 
 
+# Stripe Checkout Routing
 @app.route('/create-checkout-session/<product_id>', methods=['GET', 'POST'])
 def create_checkout_session(product_id):
     product = Product.query.filter_by(id=product_id).first()
