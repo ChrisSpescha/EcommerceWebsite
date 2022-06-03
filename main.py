@@ -49,9 +49,21 @@ class User(UserMixin, db.Model):
 class Chat(db.Model):
     __tablename__ = "chats"
     id = db.Column(db.Integer, primary_key=True)
-    sender = db.Column(db.Integer)
-    receiver = db.Column(db.Integer)
-    messages = db.Column(db.String(100))
+    User1_ID = db.Column(db.Integer)
+    User1_name = db.Column(db.String(250), nullable=False)
+    User2_ID = db.Column(db.Integer)
+    User2_name = db.Column(db.String(250), nullable=False)
+    messages = relationship("Message", back_populates="parent_chat")
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+    message_id = db.Column(db.Integer, primary_key=True)
+    parent_chat_ID = db.Column(db.Integer, db.ForeignKey("chats.id"))
+    parent_chat = relationship("Chat", back_populates="messages")
+    message_author = db.Column(db.String(250), nullable=False)
+    body = db.Column(db.String(250), nullable=False)
+    date_posted = db.Column(db.String(250), nullable=False)
 
 
 class Product(db.Model):
@@ -191,27 +203,42 @@ def user_profile(profile_id, username):
 @login_required
 def compose_message(receiver_id):
     form = MessageForm()
+    receiver = User.query.filter_by(id=receiver_id).first()
     if form.validate_on_submit():
         new_chat = Chat(
-            sender=current_user.id,
-            receiver=receiver_id,
-            messages=form.message.data
+            User1_ID=current_user.id,
+            User1_name=current_user.name,
+            User2_ID=receiver.id,
+            User2_name=receiver.name,
         )
-        db.session.add(new_chat)
+        new_msg = Message(
+            parent_chat=new_chat,
+            message_author=current_user.name,
+            body=form.message.data,
+            date_posted=date.today().strftime("%B %d, %Y")
+        )
+        db.session.add(new_msg)
         db.session.commit()
-    return render_template("message_center.html", form=form)
+        return redirect(url_for('message_center'))
+    return render_template("compose_message.html", form=form)
 
 
 @app.route("/message_center", methods=["GET", "POST"])
 @login_required
 def message_center():
-    form = MessageForm()
-    if form.validate_on_submit():
-        new_chat = Chat(
-        )
-        db.session.add(new_chat)
-        db.session.commit()
-    return render_template("message_center.html", form=form)
+    chats = Chat.query.all()
+    user_chats = []
+    for chat in chats:
+        if current_user.id == chat.User1_ID or current_user.id == chat.User2_ID:
+            user_chats.append(chat)
+    return render_template("message_center.html", chats=user_chats)
+
+
+@app.route("/chat/<chat_id>", methods=["GET", "POST"])
+@login_required
+def display_chat(chat_id):
+    chat = Chat.query.filter_by(id=chat_id)
+    return render_template("chat.html", chat=chat)
 
 
 @app.route("/post/<product_owner>/<int:product_id>", methods=["GET", "POST"])
@@ -341,7 +368,6 @@ def create_checkout_session(product_id):
 def success():
     return render_template('success.html')
 
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-

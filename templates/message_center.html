@@ -13,30 +13,19 @@
     </a>
 
     <div class="list-group list-group-flush border-bottom scrollarea">
-      <a href="#" class="list-group-item list-group-item-action active py-3 lh-tight" aria-current="true">
+      {% for chat in chats %}
+      <a href="{{ url_for('display_chat', chat_id=chat.id) }}" class="list-group-item list-group-item-action active py-3 lh-tight" aria-current="true">
         <div class="d-flex w-100 align-items-center justify-content-between">
-          <strong class="mb-1">Users names</strong>
-          <small>time stamp</small>
+          {% if current_user.name == chat.User1_name %}
+          <strong class="mb-1">-{{ chat.User2_name }}-</strong>
+          {% else %}
+          <strong class="mb-1">-{{ chat.User1_name }}-</strong>
+          {% endif %}
+          <small>{{ chat.messages[-1].date_posted }}</small>
         </div>
-        <div class="col-10 mb-1 small">Message body Message body Message body Message body Message body </div>
+        <div class="col-10 mb-1 small">{{ chat.messages[-1].body }}</div>
       </a>
-      <a href="#" class="list-group-item list-group-item-action py-3 lh-tight">
-        <div class="d-flex w-100 align-items-center justify-content-between">
-          <strong class="mb-1">List group item heading</strong>
-          <small class="text-muted">Tues</small>
-        </div>
-        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
-      </a>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-        {{ ckeditor.load() }}
-        {{ ckeditor.config(name='body') }}
-        {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
-      </div>
+      {% endfor %}
     </div>
   </div>
 
