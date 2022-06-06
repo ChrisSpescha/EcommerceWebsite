@@ -112,14 +112,13 @@
                     {% for chat in chats %}
                      <a href="{{ url_for('message_center', chat_id=chat.id) }}" class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true" method="post">
                         <li class="clearfix">
-                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
                             <div class="about">
                               {% if current_user.name == chat.User1_name %}
                                 <div class="name">{{ chat.User2_name }}</div>
                               {% else %}
                                 <div class="name">{{ chat.User1_name }}</div>
                               {% endif %}
-                                <div class="status"> <i class="fa fa-circle offline"></i>{{ chat.messages[-1].date_posted }}</div>
+                                <div class="status"> <i class="fa fa-circle online"></i>last message: {{ chat.messages[-1].date_posted }}</div>
                             </div>
                         </li>
                      </a>
@@ -131,7 +130,6 @@
                     <div class="row">
                         <div class="col-lg-6">
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-                                <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
                             </a>
                             <div class="chat-about">
                               {% if current_user.name == current_chat.User1_name %}
@@ -142,10 +140,7 @@
                             </div>
                         </div>
                         <div class="col-lg-6 hidden-sm text-right">
-                            <a href="javascript:void(0);" class="btn btn-outline-secondary"><i class="fa fa-camera"></i></a>
-                            <a href="javascript:void(0);" class="btn btn-outline-primary"><i class="fa fa-image"></i></a>
-                            <a href="javascript:void(0);" class="btn btn-outline-info"><i class="fa fa-cogs"></i></a>
-                            <a href="javascript:void(0);" class="btn btn-outline-warning"><i class="fa fa-question"></i></a>
+                            <div> <i class="fa fa-circle online"></i> You</div>
                         </div>
                     </div>
                 </div>
@@ -155,7 +150,6 @@
                         {% if message.message_author == current_user.name %}
                             <li class="clearfix">
                                 <div class="message-data text-right">
-                                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
                                 </div>
                                 <div class="message other-message float-right">{{ message.body }}</div>
                             </li>
@@ -175,9 +169,11 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fa fa-send"></i></span>
                         </div>
+                        {% if current_chat.id != 1 %}
                         <form class="form-inline my-2 my-lg-0" action="{{ url_for('message_center', chat_id=current_chat.id) }}" method="post">
                         <input type="text" class="form-control" name="text" placeholder="Enter text here..." method="post">
                         </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>

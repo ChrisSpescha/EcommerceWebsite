@@ -33,5 +33,5 @@ class ReviewForm(FlaskForm):
 
 
 class MessageForm(FlaskForm):
-    message = StringField("Messages", validators=[DataRequired()])
+    message = StringField("Compose Message", validators=[DataRequired()])
     submit = SubmitField("Send")

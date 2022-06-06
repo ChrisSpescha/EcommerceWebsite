@@ -1,14 +1,14 @@
+from forms import LoginForm, RegisterForm, CreateListingForm, ReviewForm, MessageForm
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, redirect, url_for, flash, abort, request
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
-from datetime import date
-from functools import wraps
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_gravatar import Gravatar
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from forms import LoginForm, RegisterForm, CreateListingForm, ReviewForm, MessageForm
-from flask_gravatar import Gravatar
+from functools import wraps
+from datetime import date, datetime
 import stripe
 import smtplib
 import os
@@ -27,6 +27,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+now = datetime.now()
+time = now.strftime("%H:%M  ")
 
 
 @login_manager.user_loader
@@ -220,7 +222,7 @@ def compose_message(receiver_id):
         )
         db.session.add(new_msg)
         db.session.commit()
-        return redirect(url_for('message_center'))
+        return redirect(url_for('message_center', chat_id=new_chat.id))
     return render_template("compose_message.html", form=form)
 
 
@@ -235,6 +237,7 @@ def message_center(chat_id):
             user_chats.append(chat)
     if request.method == "POST":
         body = request.form.get('text')
+
         # Commit new Msg to Existing Chat
         new_msg = Message(
             parent_chat=current_chat,
