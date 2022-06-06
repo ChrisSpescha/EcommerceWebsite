@@ -361,8 +361,8 @@ def create_checkout_session(product_id):
         },
     )
 
-    my_email = "ChrisPython100@gmail.com"
-    password = "934texas"
+    my_email = "Email@email.com"
+    password = "password"
     with smtplib.SMTP("smtp.gmail.com") as connection:
         connection.starttls()
         connection.login(user=my_email, password=password)
