@@ -3,40 +3,41 @@
 {% block content %}
 {% include "header.html" %}
 
-<div class="row py-5 px-4"> <div class="col-md-5 mx-auto">
-  <!-- Profile widget -->
-  <div class="bg-white shadow rounded overflow-hidden">
-    <div class="px-4 pt-0 pb-4 cover">
-      <div class="media align-items-end profile-head">
-        <div class="profile mr-3">
-          <img src="{{ profile.email | gravatar }}" alt="..." width="130" class="rounded mb-2 img-thumbnail">
-<!--          <a href="#" class="btn btn-outline-dark btn-sm btn-block">Edit profile</a></div>-->
-        <div class="media-body mb-5 text-dark">
-          <h4 class="mt-0 mb-0">{{ profile.name }}</h4>
+<div class="row py-5 px-4">
+  <div class="col-md-5 mx-auto">
+    <!-- Profile widget -->
+    <div class="bg-white shadow rounded overflow-hidden">
+      <div class="px-4 pt-0 pb-4 cover">
+        <div class="media align-items-end profile-head">
+          <div class="profile mr-3">
+            <img src="{{ profile.email | gravatar }}" alt="..." width="130" class="rounded mb-2 img-thumbnail">
+            <!--          <a href="#" class="btn btn-outline-dark btn-sm btn-block">Edit profile</a></div>-->
+            <div class="media-body mb-5 text-dark">
+              <h4 class="mt-0 mb-0">{{ profile.name }}</h4>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-          <div class="py-4 px-4">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-              <a href="{{ url_for('compose_message', receiver_id=profile.id) }}">Send Message</a>
-              <hr>
-              <h5 class="mb-0">Products Listed</h5>
-            </div>
-            <div class="row">
-              {% for product in profile.products %}
-              <div class="col-lg-6 mb-2 pr-lg-1">
-                <a href="{{ url_for('show_product', product_owner=product.product_owner.name, product_id=product.id) }}">
+        <div class="py-4 px-4">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <a href="{{ url_for('compose_message', receiver_id=profile.id) }}">Send Message</a>
+            <hr>
+            <h5 class="mb-0">Products Listed</h5>
+          </div>
+          <div class="row">
+            {% for product in profile.products %}
+            <div class="col-lg-6 mb-2 pr-lg-1">
+              <a href="{{ url_for('show_product', product_owner=product.product_owner.name, product_id=product.id) }}">
                 <img src="{{ product.img_url }}" alt="" class="img-fluid rounded shadow-sm">
-                </a>
-              </div>
-              {% endfor %}
+              </a>
             </div>
+            {% endfor %}
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
 
 {% include "footer.html" %}

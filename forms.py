@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditorField
 
 
-# WTForm
+# Wtforms
 class CreateListingForm(FlaskForm):
     title = StringField("Listing Title", validators=[DataRequired()])
     price = StringField("Price", validators=[DataRequired()])

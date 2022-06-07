@@ -16,19 +16,19 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ["USELESS_KEY"]
-ckeditor = CKEditor(app)
-Bootstrap(app)
-gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
 stripe.api_key = os.environ["STRIPE_API_KEY"]
-
+now = datetime.now()
+time = now.strftime("%H:%M")
 # CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# App Wraps
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-now = datetime.now()
-time = now.strftime("%H:%M  ")
+ckeditor = CKEditor(app)
+gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
+Bootstrap(app)
 
 
 @login_manager.user_loader
@@ -36,7 +36,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-# CONFIGURE TABLE
+# CONFIGURE Database
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -104,6 +104,7 @@ def admin_only(f):
     return decorated_function
 
 
+# Home and NavBar Routes
 @app.route('/', methods=["GET", "POST"])
 def get_all_products():
     products = Product.query.all()
@@ -230,9 +231,9 @@ def compose_message(receiver_id):
 @login_required
 def message_center(chat_id):
     current_chat = Chat.query.filter_by(id=chat_id).first()
-    chats = Chat.query.all()
+    all_chats = Chat.query.all()
     user_chats = []
-    for chat in chats:
+    for chat in all_chats:
         if current_user.id == chat.User1_ID or current_user.id == chat.User2_ID:
             user_chats.append(chat)
     if request.method == "POST":
