@@ -15,12 +15,12 @@ import os
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'randomness'
-stripe.api_key = 'sk_test_51L46kpJ4B3IaQK0ayzwgsUFKRNti1YGVvfUMh8CGADTzg3cenlQw8OKSNwg4yVd3co0is2MsBuna4IYftynSAsfY00FDTstYz6'
+app.config['SECRET_KEY'] = os.environ.get('APP_CONFIG_KEY')
+stripe.api_key = os.environ.get('STRIPE_API_KEY')
 now = datetime.now()
 time = now.strftime("%H:%M")
 # CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shop.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # App Wraps
 db = SQLAlchemy(app)
