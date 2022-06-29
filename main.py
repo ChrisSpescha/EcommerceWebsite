@@ -1,22 +1,22 @@
-from forms import LoginForm, RegisterForm, CreateListingForm, ReviewForm, MessageForm
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, redirect, url_for, flash, abort, request
-from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
-from flask_gravatar import Gravatar
+from datetime import date, datetime
+from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from functools import wraps
-from datetime import date, datetime
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from forms import LoginForm, RegisterForm, CreateListingForm, ReviewForm, MessageForm
+from flask_gravatar import Gravatar
 import stripe
 import smtplib
 import os
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ["USELESS_KEY"]
-stripe.api_key = os.environ["STRIPE_API_KEY"]
+app.config['SECRET_KEY'] = 'randomness'
+stripe.api_key = 'sk_test_51L46kpJ4B3IaQK0ayzwgsUFKRNti1YGVvfUMh8CGADTzg3cenlQw8OKSNwg4yVd3co0is2MsBuna4IYftynSAsfY00FDTstYz6'
 now = datetime.now()
 time = now.strftime("%H:%M")
 # CONNECT TO DB
@@ -382,4 +382,4 @@ def success():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
