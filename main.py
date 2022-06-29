@@ -14,6 +14,7 @@ import smtplib
 import os
 
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('APP_CONFIG_KEY')
 stripe.api_key = os.environ.get('STRIPE_API_KEY')
