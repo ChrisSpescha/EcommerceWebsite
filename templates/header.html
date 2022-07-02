@@ -95,6 +95,7 @@
             <a class="nav-link" href="{{ url_for('user_profile', profile_id=current_user.id, username=current_user.name) }}">Profile</a>
           </li>
           <!-- Nav Item - Messages -->
+
           <li class="nav-item dropdown no-arrow mx-1">
               <i class="bi bi-envelope"></i>
             <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -109,19 +110,20 @@
               <h6 class="dropdown-header">
                 Message Center
               </h6>
-              <a class="dropdown-item d-flex align-items-center" href="{{ url_for('message_center', chat_id=1) }}">
-                <div class="dropdown-list-image mr-3">
-                  <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="...">
-                  <div class="status-indicator bg-success"></div>
-                </div>
-
+              {% for chat in chats %}
+                {% if current_user.id == chat.User1_ID or current_user.id == chat.User2_ID %}
+              <a class="dropdown-item d-flex align-items-center" href="{{ url_for('message_center', chat_id=chat.id) }}">
                 <div class="font-weight-bold">
-                  <div class="text-truncate">Hi there! I am wondering if you can help me with a
-                    problem I've been having.</div>
-
-                  <div class="small text-gray-500">Emily Fowler · 58m</div>
+                  <div class="text-truncate">{{ chat.messages[-1].body }}</div>
+                    {% if current_user.id == chat.User2_ID %}
+                      <div class="small text-gray-500">{{ chat.User1_name }}</div>
+                    {% else %}
+                      <div class="small text-gray-500">{{ chat.User1_name }}</div>
+                    {% endif %}
                 </div>
               </a>
+                {% endif %}
+              {% endfor %}
               <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
             </div>
           </li>

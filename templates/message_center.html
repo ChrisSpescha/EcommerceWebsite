@@ -60,9 +60,14 @@
             <a class="nav-link" href="{{ url_for('user_profile', profile_id=current_user.id, username=current_user.name) }}">Profile</a>
           </li>
           <!-- Nav Item - Messages -->
+  <!-- Nav Item - Messages -->
+
           <li class="nav-item dropdown no-arrow mx-1">
-            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="fas fa-envelope fa-fw"></i>
+              <i class="bi bi-envelope"></i>
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
+                  <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
+                </svg>
               <!-- Counter - Messages -->
               <span class="badge badge-danger badge-counter">7</span>
             </a>
@@ -71,20 +76,20 @@
               <h6 class="dropdown-header">
                 Message Center
               </h6>
-              <a class="dropdown-item d-flex align-items-center" href="{{ url_for('message_center', chat_id=1) }}">
-                <div class="dropdown-list-image mr-3">
-                  <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="...">
-                  <div class="status-indicator bg-success"></div>
-                </div>
+              {% for chat in chats %}
+                {% if current_user.id == chat.User1_ID or current_user.id == chat.User2_ID %}
+              <a class="dropdown-item d-flex align-items-center" href="{{ url_for('message_center', chat_id=chat.id) }}">
                 <div class="font-weight-bold">
-                  <div class="text-truncate">Hi there! I am wondering if you can help me with a
-                    problem I've been having.</div>
-
-                  <div class="small text-gray-500">Emily Fowler · 58m</div>
+                  <div class="text-truncate">{{ chat.messages[-1].body }}</div>
+                    {% if current_user.id == chat.User2_ID %}
+                      <div class="small text-gray-500">{{ chat.User1_name }}</div>
+                    {% else %}
+                      <div class="small text-gray-500">{{ chat.User1_name }}</div>
+                    {% endif %}
                 </div>
               </a>
-              <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
-            </div>
+                {% endif %}
+              {% endfor %}
           </li>
           {% endif %}
         </ul>

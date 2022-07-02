@@ -14,7 +14,6 @@ import smtplib
 import os
 
 
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('APP_CONFIG_KEY')
 stripe.api_key = os.environ.get('STRIPE_API_KEY')
@@ -108,6 +107,7 @@ def admin_only(f):
 # Home and NavBar Routes
 @app.route('/', methods=["GET", "POST"])
 def get_all_products():
+    all_chats = Chat.query.all()
     products = Product.query.all()
     if request.method == "POST":
         searched_products = []
@@ -116,14 +116,13 @@ def get_all_products():
             if box_value.lower() in product.title.lower():
                 searched_products.append(product)
         products = searched_products
-    return render_template("index.html", all_products=products, current_user=current_user)
+    return render_template("index.html", all_products=products, current_user=current_user, chats=all_chats)
 
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-
         if User.query.filter_by(email=form.email.data).first():
             print(User.query.filter_by(email=form.email.data).first())
             # User already exists
@@ -199,14 +198,16 @@ def logout():
 @app.route("/profile/<profile_id>/<username>")
 @login_required
 def user_profile(profile_id, username):
+    all_chats = Chat.query.all()
     profile = User.query.filter_by(id=profile_id).first()
-    return render_template("profile.html", current_user=current_user, profile=profile)
+    return render_template("profile.html", current_user=current_user, profile=profile, chats=all_chats)
 
 
 # Messaging Routes
 @app.route("/compose_message/<receiver_id>", methods=["GET", "POST"])
 @login_required
 def compose_message(receiver_id):
+    all_chats = Chat.query.all()
     form = MessageForm()
     receiver = User.query.filter_by(id=receiver_id).first()
     if form.validate_on_submit():
@@ -225,7 +226,7 @@ def compose_message(receiver_id):
         db.session.add(new_msg)
         db.session.commit()
         return redirect(url_for('message_center', chat_id=new_chat.id))
-    return render_template("compose_message.html", form=form)
+    return render_template("compose_message.html", form=form, chats=all_chats)
 
 
 @app.route("/message_center/<chat_id>", methods=["GET", "POST"])
@@ -255,6 +256,7 @@ def message_center(chat_id):
 # Product Routes
 @app.route("/post/<product_owner>/<int:product_id>", methods=["GET", "POST"])
 def show_product(product_id, product_owner):
+    all_chats = Chat.query.all()
     form = ReviewForm()
     requested_product = Product.query.get(product_id)
 
@@ -271,11 +273,12 @@ def show_product(product_id, product_owner):
         db.session.add(new_review)
         db.session.commit()
 
-    return render_template("listing.html", product=requested_product, form=form, current_user=current_user)
+    return render_template("listing.html", product=requested_product, form=form, current_user=current_user, chats=all_chats)
 
 
 @app.route("/new-post", methods=["GET", "POST"])
 def add_new_listing():
+    all_chats = Chat.query.all()
     form = CreateListingForm()
     if form.validate_on_submit():
         new_product = Product(
@@ -291,11 +294,12 @@ def add_new_listing():
         db.session.commit()
         return redirect(url_for("get_all_products"))
 
-    return render_template("add-listing.html", form=form, current_user=current_user)
+    return render_template("add-listing.html", form=form, current_user=current_user, chats=all_chats)
 
 
 @app.route("/edit-post/<int:product_id>", methods=["GET", "POST"])
 def edit_listing(product_id):
+    all_chats = Chat.query.all()
     product = Product.query.get(product_id)
     edit_form = CreateListingForm(
         title=product.title,
@@ -312,9 +316,9 @@ def edit_listing(product_id):
         product.stock = edit_form.stock.data
         product.img_url = edit_form.img_url.data
         db.session.commit()
-        return redirect(url_for("show_product", product_id=product.id))
+        return redirect(url_for("show_product", product_id=product.id, product_owner=current_user.name))
 
-    return render_template("add-listing.html", form=edit_form, is_edit=True, current_user=current_user)
+    return render_template("add-listing.html", form=edit_form, is_edit=True, current_user=current_user, chats=all_chats)
 
 
 @app.route("/delete/<int:product_id>")
@@ -363,17 +367,17 @@ def create_checkout_session(product_id):
         },
     )
 
-    my_email = "Email@email.com"
-    password = "password"
-    with smtplib.SMTP("smtp.gmail.com") as connection:
-        connection.starttls()
-        connection.login(user=my_email, password=password)
-        connection.sendmail(
-            from_addr=my_email,
-            to_addrs=current_user.email,
-            msg="Subject:Thanks for Purchasing!\n\nThis is your Virtual Receipt"
-        )
-    print(current_user.email)
+    # my_email = "Email@email.com"
+    # password = "password"
+    # with smtplib.SMTP("smtp.gmail.com") as connection:
+    #     connection.starttls()
+    #     connection.login(user=my_email, password=password)
+    #     connection.sendmail(
+    #         from_addr=my_email,
+    #         to_addrs=current_user.email,
+    #         msg="Subject:Thanks for Purchasing!\n\nThis is your Virtual Receipt"
+    #     )
+    # print(current_user.email)
     return redirect(session.url)
 
 
