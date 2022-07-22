@@ -13,7 +13,6 @@ import stripe
 import smtplib
 import os
 
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('APP_CONFIG_KEY')
 stripe.api_key = os.environ.get('STRIPE_API_KEY')
@@ -27,7 +26,8 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 ckeditor = CKEditor(app)
-gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
+gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False,
+                    base_url=None)
 Bootstrap(app)
 
 
@@ -101,6 +101,7 @@ def admin_only(f):
         if current_user.id != 1:
             return abort(403)
         return f(*args, **kwargs)
+
     return decorated_function
 
 
@@ -142,22 +143,22 @@ def register():
 
         # Strip OnBoarding
         response = stripe.Account.create(
-                  country="US",
-                  type="express",
-                  email=form.email.data,
-                  capabilities={
-                    "card_payments": {"requested": True},
-                    "transfers": {"requested": True},
-                  },
-                  business_type="individual",
-                  business_profile={"url": "google.com"},
-                )
+            country="US",
+            type="express",
+            email=form.email.data,
+            capabilities={
+                "card_payments": {"requested": True},
+                "transfers": {"requested": True},
+            },
+            business_type="individual",
+            business_profile={"url": "google.com"},
+        )
 
         link = stripe.AccountLink.create(
-          account=response['id'],
-          refresh_url="http://127.0.0.1:5000",
-          return_url="http://127.0.0.1:5000",
-          type="account_onboarding",
+            account=response['id'],
+            refresh_url="http://127.0.0.1:5000",
+            return_url="http://127.0.0.1:5000",
+            type="account_onboarding",
         )
         new_user.stripe_account_id = response['id']
         db.session.add(new_user)
@@ -229,6 +230,7 @@ def compose_message(receiver_id):
     return render_template("compose_message.html", form=form, chats=all_chats)
 
 
+# Message Center Function. Loops through database and sends current_users message data to page.
 @app.route("/message_center/<chat_id>", methods=["GET", "POST"])
 @login_required
 def message_center(chat_id):
@@ -253,7 +255,7 @@ def message_center(chat_id):
     return render_template("message_center.html", chats=user_chats, current_chat=current_chat)
 
 
-# Product Routes
+# Product Routes. Display, add, edit, and delete listing available to users.
 @app.route("/post/<product_owner>/<int:product_id>", methods=["GET", "POST"])
 def show_product(product_id, product_owner):
     all_chats = Chat.query.all()
@@ -273,7 +275,8 @@ def show_product(product_id, product_owner):
         db.session.add(new_review)
         db.session.commit()
 
-    return render_template("listing.html", product=requested_product, form=form, current_user=current_user, chats=all_chats)
+    return render_template("listing.html", product=requested_product, form=form, current_user=current_user,
+                           chats=all_chats)
 
 
 @app.route("/new-post", methods=["GET", "POST"])
@@ -337,7 +340,8 @@ def delete_review(review_id):
     return redirect(url_for('get_all_products'))
 
 
-# Stripe Checkout Routing
+# Stripe Checkout Function. Route Uses Stripe Connect API to direct user to Stripe's payment gateway, if payment is
+# successful then user is redirected to success page and emailed virtual receipt
 @app.route('/create-checkout-session/<product_id>', methods=['GET', 'POST'])
 def create_checkout_session(product_id):
     product = Product.query.filter_by(id=product_id).first()
@@ -366,7 +370,7 @@ def create_checkout_session(product_id):
             },
         },
     )
-
+    ## Update Email Function
     # my_email = "Email@email.com"
     # password = "password"
     # with smtplib.SMTP("smtp.gmail.com") as connection:
